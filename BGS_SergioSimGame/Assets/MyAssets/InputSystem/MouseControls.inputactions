@@ -6,7 +6,7 @@
             "id": "e77646e6-2b95-4ad2-a6c8-fdb1719b75de",
             "actions": [
                 {
-                    "name": "fire",
+                    "name": "interact",
                     "type": "Button",
                     "id": "35278e64-47cf-4b7b-8496-af37f26ccb26",
                     "expectedControlType": "Button",
@@ -32,7 +32,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "fire",
+                    "action": "interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "825c0d25-9fda-4e93-8e4b-1f1249453529",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "interact",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
