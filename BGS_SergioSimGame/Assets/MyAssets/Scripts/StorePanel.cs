@@ -35,6 +35,18 @@ public class StorePanel : MonoBehaviour
 
     [Header("Scrap Menu")]
     [SerializeField] private GameObject scrapMenuPanel;
+    [SerializeField] private GameObject descriptionScrapPanel;
+    [SerializeField] private Transform savagableItemsParent;
+    [SerializeField] private TMP_InputField quantityInputFieldSalvage;
+    [SerializeField] private TextMeshProUGUI dustToSalvage;
+    [SerializeField] private TextMeshProUGUI cosmicToSalvage;
+    [SerializeField] private TextMeshProUGUI dustTotalSalvage;
+    [SerializeField] private TextMeshProUGUI cosmicTotalSalvage;
+    [SerializeField] private GameObject salvageSuccess;
+    [SerializeField] private GameObject salvageFailed;
+    [SerializeField] private GameObject salvageButtonGameObj;
+    private StoreItems selectedItemIdToSavage = StoreItems.Nothing;
+
     [Header("Inventory Materials")]
     [SerializeField] private TextMeshProUGUI currentDustText;
     [SerializeField] private TextMeshProUGUI currentCrystalsText;
@@ -44,6 +56,7 @@ public class StorePanel : MonoBehaviour
     private UnityAction CloseStoreCallback;
     private ShopData shopDataModified;
     private Dictionary<StoreItems, ShopItemData> storeMenuDictionary = new Dictionary<StoreItems, ShopItemData>();
+    private Dictionary<StoreItems, ShopItemData> storeMenuDictionarySalvagable = new Dictionary<StoreItems, ShopItemData>();
 
     private void Awake()
     {
@@ -60,6 +73,7 @@ public class StorePanel : MonoBehaviour
         ResetValues();
         storePanel.SetActive(true);
         InitializeCraftMenu(shopData.shopCraftableItems);
+        InitializeScrapMenu(shopData.shopSavagableItems);
         UpdateInventoryMaterialsGUI();
         ChangeState(ShopState.Crafting);
     }
@@ -71,10 +85,14 @@ public class StorePanel : MonoBehaviour
             case ShopState.Crafting:
                 craftTabButton.interactable = false;
                 salvageTabButton.interactable = true;
+                craftMenuPanel.SetActive(true);
+                scrapMenuPanel.SetActive(false);
                 break;
             case ShopState.Salvaging:
                 craftTabButton.interactable = true;
                 salvageTabButton.interactable = false;
+                craftMenuPanel.SetActive(false);
+                scrapMenuPanel.SetActive(true);
                 break;
         }
     }
@@ -106,7 +124,30 @@ public class StorePanel : MonoBehaviour
         purchaseSuccess.SetActive(false);
         purchaseFailed.SetActive(false);
     }
+    private void InitializeScrapMenu(List<SalvagableItem> salvagableItems)
+    {
+        foreach (SalvagableItem salvagableItem in salvagableItems)
+        {
+            ItemData itemData = AllItemsData.Instance.GetItemData(salvagableItem.storeItem);
+            if (itemData == null) continue;
+            StoreProduct storeProduct = Instantiate(productPrefab, savagableItemsParent).GetComponent<StoreProduct>();
+            Material dustSalvagable = salvagableItem.materials.Find(theMaterial => theMaterial.material == MaterialType.LunarDust);
+            Material crystalsSalvagable = salvagableItem.materials.Find(theMaterial => theMaterial.material == MaterialType.CosmicCrystals);
 
+            string dustQuantity = dustSalvagable != null ? dustSalvagable.count.ToString() : null;
+            string crystalsQuantity = crystalsSalvagable != null ? crystalsSalvagable.count.ToString() : null;
+
+            ShopItemData newShopItemData = new ShopItemData();
+            newShopItemData.itemData = itemData;
+            newShopItemData.dustMaterialNeeded = dustSalvagable != null ? dustSalvagable.count : 0;
+            newShopItemData.crystalsMaterialNeeded = crystalsSalvagable != null ? crystalsSalvagable.count : 0;
+            newShopItemData.quantityLeft = GameManager.Instance.GetItemCount(itemData.storeItem);//Getting the players inventory quantity of this salvagable item
+            storeMenuDictionarySalvagable.Add(itemData.storeItem, newShopItemData);
+
+            storeProduct.Setup(itemData.storeItem, itemData.icon, itemData.name, dustQuantity, crystalsQuantity, newShopItemData.quantityLeft.ToString(), this);
+        }
+        descriptionScrapPanel.SetActive(false);
+    }
 
     private void UpdateInventoryMaterialsGUI()
     {
@@ -119,10 +160,19 @@ public class StorePanel : MonoBehaviour
         foreach (Transform child in productsParent)
             Destroy(child.gameObject);
         storeMenuDictionary.Clear();
+        foreach (Transform child in savagableItemsParent)
+            Destroy(child.gameObject);
+        storeMenuDictionarySalvagable.Clear();
     }
 
     public void ItemPressed(StoreItems pressedId, StoreProduct storeProduct)
     {
+        if (currentState == ShopState.Salvaging)
+        {
+            ItemPressedSalvagable(pressedId, storeProduct);
+            return;
+        }
+
         if(!descriptionPanel.activeSelf) descriptionPanel.SetActive(true);
 
         productName.text = storeMenuDictionary[pressedId].itemData.name;
@@ -139,6 +189,22 @@ public class StorePanel : MonoBehaviour
             craftButtonGameObj.SetActive(false);
         else
             craftButtonGameObj.SetActive(true);
+    }
+    public void ItemPressedSalvagable(StoreItems pressedId, StoreProduct storeProduct)
+    {
+        if (!descriptionScrapPanel.activeSelf) descriptionScrapPanel.SetActive(true);
+
+        dustToSalvage.text = storeMenuDictionarySalvagable[pressedId].dustMaterialNeeded.ToString();
+        cosmicToSalvage.text = storeMenuDictionarySalvagable[pressedId].crystalsMaterialNeeded.ToString();
+        quantityInputField.text = "";
+        dustTotalSalvage.text = dustToSalvage.text;
+        cosmicTotalSalvage.text = cosmicToSalvage.text;
+        selectedItemIdToSavage = pressedId;
+
+        if (storeMenuDictionarySalvagable[pressedId].quantityLeft == 0)
+            salvageButtonGameObj.SetActive(false);
+        else
+            salvageButtonGameObj.SetActive(true);
     }
     /// <summary>
     /// Checks if enough materials are held to craft specified quantity of the item.
@@ -162,7 +228,22 @@ public class StorePanel : MonoBehaviour
         GameManager.Instance.ChangeInventoryData(-dustTotalCostInt, -crystalTotalCostInt, storeMenuDictionary[selectedItemId].itemData.storeItem, quantityToModify);
         purchaseSuccess.SetActive(true);
     }
-
+    public void ConfirmSelectedScrapItem()
+    {
+        int dustTotalSalvageInt = int.Parse(dustTotalSalvage.text);
+        int crystalTotalSalvageInt = int.Parse(cosmicTotalSalvage.text);
+        int quantityToModify = 1;
+        if (!int.TryParse(quantityInputFieldSalvage.text, out quantityToModify))
+            quantityToModify = 1;
+        //if (GameManager.Instance.GetMaterialCount(MaterialType.LunarDust) < dustTotalSalvageInt || GameManager.Instance.GetMaterialCount(MaterialType.CosmicCrystals) < crystalTotalSalvageInt)
+        //{
+        //    purchaseFailed.SetActive(true);
+        //    return;
+        //}
+        //Else proceed with the salvaging
+        GameManager.Instance.ChangeInventoryData(dustTotalSalvageInt, crystalTotalSalvageInt, storeMenuDictionarySalvagable[selectedItemIdToSavage].itemData.storeItem, -quantityToModify);
+        purchaseSuccess.SetActive(true);
+    }
     public void OnCraftQuantityValueChanged(string quantityString)
     {
         int quantity = 0;
@@ -185,6 +266,28 @@ public class StorePanel : MonoBehaviour
         dustTotalCost.text = (quantity * storeMenuDictionary[selectedItemId].dustMaterialNeeded).ToString();
         cosmicTotalCost.text = (quantity * storeMenuDictionary[selectedItemId].crystalsMaterialNeeded).ToString();
     }
+    public void OnScrapQuantityValueChanged(string quantityString)
+    {
+        int quantity = 0;
+        if (!int.TryParse(quantityString, out quantity))
+            quantity = 0;
+
+        //Check if input quantity is much higher than available item quantity in store
+        if (quantity > storeMenuDictionarySalvagable[selectedItemIdToSavage].quantityLeft)
+        {
+            quantity = storeMenuDictionarySalvagable[selectedItemIdToSavage].quantityLeft;
+            quantityInputFieldSalvage.text = quantity.ToString();
+        }
+        else//Don't let input be 0
+            if (quantity == 0)
+        {
+            quantity = 1;
+            quantityInputFieldSalvage.text = quantity.ToString();
+        }
+
+        dustTotalSalvage.text = (quantity * storeMenuDictionarySalvagable[selectedItemIdToSavage].dustMaterialNeeded).ToString();
+        cosmicTotalSalvage.text = (quantity * storeMenuDictionarySalvagable[selectedItemIdToSavage].crystalsMaterialNeeded).ToString();
+    }
     public void ClosePanel()
     {
         GameplayManager.Instance.ShopClosing(shopDataModified);
@@ -193,6 +296,14 @@ public class StorePanel : MonoBehaviour
     public void CloseCraftSuccessWindow()
     {
         Initialize(shopDataModified);
+    }
+    public void OpenCraftMenu()
+    {
+        ChangeState(ShopState.Crafting);
+    }
+    public void OpenScrapMenu()
+    {
+        ChangeState(ShopState.Salvaging);
     }
 }
 

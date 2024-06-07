@@ -32,6 +32,13 @@ public class GameManager : Singleton<GameManager>
             return materialFound.count;
         else return 0;
     }
+    public int GetItemCount(StoreItems searchedItem)
+    {
+        Item itemFound = gameData.inventoryData.items.Find(theItem => theItem.storeItem == searchedItem);
+        if (itemFound != null)
+            return itemFound.count;
+        else return 0;
+    }
     public void ChangeInventoryData(int dustToAdd, int crystalsToAdd, StoreItems storeItemToChange, int storeItemQuantityToAdd)
     {
         Material dustMaterialFound = gameData.inventoryData.materials.Find(theMaterial => theMaterial.material == MaterialType.LunarDust);
