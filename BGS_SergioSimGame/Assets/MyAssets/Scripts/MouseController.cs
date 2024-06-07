@@ -1,13 +1,17 @@
+using NicoUtilities;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Interactions;
 
-public class MouseController : MonoBehaviour
+public class MouseController : Singleton<MouseController>
 {
+    [SerializeField] private MouseControllerState currentState;
     [Header("Movement")]
+    [SerializeField] private PlayerInput playerInput;
+    [SerializeField] private string gameplayMap;
+    [SerializeField] private string menusMap;
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Vector2 moveInput = Vector2.zero;
@@ -28,21 +32,46 @@ public class MouseController : MonoBehaviour
     [SerializeField] private InteractionType currentInteraction = InteractionType.None;
     private IInteractable currentInteractable;
 
-    private void Awake()
-    {
-        startingVisualsPos = playerArtRenderer.transform.localPosition;
-        runningBooleanHash = Animator.StringToHash(runningBoolean);
-    }
     private void Update()
     {
-        VisualsFlip();
-        Animations();
+        switch (currentState)
+        {
+            case MouseControllerState.Moving:
+                VisualsFlip();
+                Animations();
+                break;
+            case MouseControllerState.Shopping:
+                break;
+        }
     }
     private void FixedUpdate()
     {
-        Move();
+        switch (currentState)
+        {
+            case MouseControllerState.Moving:
+                Move();
+                break;
+        }
     }
-
+    public void ChangeState(MouseControllerState newControllerState)
+    {
+        currentState = newControllerState;
+        switch(currentState)
+        {
+            case MouseControllerState.Moving:
+                playerInput.SwitchCurrentActionMap(gameplayMap);
+                break;
+            case MouseControllerState.Shopping:
+                playerInput.SwitchCurrentActionMap(menusMap);
+                break;
+        }
+    }
+    public void Initialize()
+    {
+        startingVisualsPos = playerArtRenderer.transform.localPosition;
+        runningBooleanHash = Animator.StringToHash(runningBoolean);
+        ChangeState(MouseControllerState.Moving);
+    }
     private void Move()
     {
         rb.velocity = moveInput * moveSpeed;
@@ -84,17 +113,25 @@ public class MouseController : MonoBehaviour
                 break;
         }
     }
+    public void OnSubmit(InputAction.CallbackContext context)
+    {
+        switch (context.phase)
+        {
+            case InputActionPhase.Started:
+                //TriedInteracting();
+                Debug.Log("Submiting on menu");
+                break;
+        }
+    }
     #endregion
 
     #region Interactions
     private void TriedInteracting()
     {
-        switch (currentInteraction)
+        if(currentInteraction == InteractionType.Shop) 
         {
-            case InteractionType.Shop:
-                Debug.Log("interacting with shop");
-                currentInteractable.Perform();
-                break;
+            ChangeState(MouseControllerState.Shopping);
+            currentInteractable.Perform();
         }
     }
     private void OnTriggerEnter2D(Collider2D collision)
@@ -115,4 +152,10 @@ public class MouseController : MonoBehaviour
             currentInteraction = InteractionType.None;
     }
     #endregion
+}
+
+public enum MouseControllerState
+{
+    Moving,
+    Shopping,
 }

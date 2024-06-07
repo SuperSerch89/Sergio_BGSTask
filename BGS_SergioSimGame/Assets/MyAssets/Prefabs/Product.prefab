@@ -1037,6 +1037,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 4385841304134995896}
   nameText: {fileID: 3082623471811667277}
+  lunarCostParent: {fileID: 7207529299667601273}
+  cosmicCostParent: {fileID: 6473175968475179688}
   lunarCostText: {fileID: 3870098425672521867}
   cosmicCostText: {fileID: 1517248953336302029}
   quantityText: {fileID: 3411656836526574570}

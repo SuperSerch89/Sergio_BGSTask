@@ -8,20 +8,34 @@ public class StoreProduct : MonoBehaviour
 {
     [SerializeField] private Image icon;
     [SerializeField] private TextMeshProUGUI nameText;
+    [SerializeField] private GameObject lunarCostParent;
+    [SerializeField] private GameObject cosmicCostParent;
     [SerializeField] private TextMeshProUGUI lunarCostText;
     [SerializeField] private TextMeshProUGUI cosmicCostText;
     [SerializeField] private TextMeshProUGUI quantityText;
 
-    [SerializeField] private StoreItems itemID;
-    [SerializeField] private StorePanel itemPanel;
+    [SerializeField][ReadOnlyAttribute] private StoreItems itemID;
+    [SerializeField][ReadOnlyAttribute] private StorePanel itemPanel;
 
     public void Setup(StoreItems newItemId, Sprite sprite, string newName, string newLunarCostText, string newCosmicCostText, string newQuantityText, StorePanel newStorePanel)
     {
         itemID = newItemId;
         icon.sprite = sprite;
         nameText.text = newName;
-        lunarCostText.text = newLunarCostText;
-        cosmicCostText.text = newCosmicCostText;
+        if(newLunarCostText == null)
+            lunarCostParent.SetActive(false);
+        else
+        {
+            lunarCostParent.SetActive(true);
+            lunarCostText.text = newLunarCostText;
+        }
+        if (newCosmicCostText == null)
+            cosmicCostParent.SetActive(false);
+        else
+        {
+            cosmicCostParent.SetActive(true);
+            cosmicCostText.text = newCosmicCostText;
+        }
         quantityText.text = newQuantityText;
         gameObject.SetActive(true);
         itemPanel = newStorePanel;
