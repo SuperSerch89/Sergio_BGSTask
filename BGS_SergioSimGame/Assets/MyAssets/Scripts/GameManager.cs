@@ -10,8 +10,9 @@ public class GameManager : Singleton<GameManager>
 
     public GameData GameData { get { return gameData; } }
 
-    private void Start()
+    protected override void Awake()
     {
+        base.Awake();
         CreateNewGameData();
         CallStartCurrentSceneManager();
     }

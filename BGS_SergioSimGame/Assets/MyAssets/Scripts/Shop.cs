@@ -12,10 +12,6 @@ public class Shop : MonoBehaviour, IInteractable
     public ShopData CurrentShopData {  get { return currentShopData; } }
 
 
-
-    //private int skin=1;
-    //public MouseHelmet helmet;
-
     private void Awake()
     {
         CreateNewShopData();
@@ -28,12 +24,6 @@ public class Shop : MonoBehaviour, IInteractable
     }
     public void Perform()
     {
-        //Debug.Log("Opening shop");
-        //if(skin == 1)
-        //    helmet.SwitchHelmet(HelmetTypes.Orange);
-        //else
-        //    helmet.SwitchHelmet(HelmetTypes.Purple);
-        //skin *= -1;
         GameplayManager.Instance.ShopOpening(this);
     }
     public void UpdateShopData(ShopData modifiedShopData)

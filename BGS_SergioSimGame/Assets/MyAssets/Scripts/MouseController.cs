@@ -31,6 +31,7 @@ public class MouseController : Singleton<MouseController>
     [Header("Interactions")]
     [SerializeField] private InteractionType currentInteraction = InteractionType.None;
     private IInteractable currentInteractable;
+    [SerializeField] private MouseHelmet mouseHelmet;
 
     private void Update()
     {
@@ -98,6 +99,10 @@ public class MouseController : Singleton<MouseController>
         else
             animator.SetBool(runningBooleanHash, true);
     }
+    public void EquipHelmet(HelmetTypes interactedHelmet)
+    {
+        mouseHelmet.SwitchHelmet(interactedHelmet);
+    }
 
     #region PlayerInput
     public void OnMove(InputAction.CallbackContext context)
@@ -128,23 +133,23 @@ public class MouseController : Singleton<MouseController>
     #region Interactions
     private void TriedInteracting()
     {
-        if(currentInteraction == InteractionType.Shop) 
+        switch (currentInteraction)
         {
-            ChangeState(MouseControllerState.Shopping);
-            currentInteractable.Perform();
+            case InteractionType.Shop:
+                ChangeState(MouseControllerState.Shopping);
+                currentInteractable.Perform();
+                break;
+            case InteractionType.HelmetEquip:
+                currentInteractable.Perform();
+                break;
         }
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
         currentInteractable = collision.GetComponentInParent<IInteractable>();
-        switch (currentInteractable.InteractionType)
-        {
-            case InteractionType.Shop:
-                currentInteraction = InteractionType.Shop;
-                break;
-        }
+        if(currentInteractable != null)
+            currentInteraction = currentInteractable.InteractionType;
     }
-
     private void OnTriggerExit2D(Collider2D collision)
     {
         currentInteractable = collision.GetComponentInParent<IInteractable>();

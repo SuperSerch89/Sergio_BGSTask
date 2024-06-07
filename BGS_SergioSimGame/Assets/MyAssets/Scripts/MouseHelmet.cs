@@ -19,5 +19,7 @@ public class MouseHelmet : MonoBehaviour
 public enum HelmetTypes
 {
     Orange,
-    Purple
+    Purple,
+    Pink,
+    Sky
 }

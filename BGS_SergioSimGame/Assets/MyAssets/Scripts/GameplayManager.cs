@@ -11,7 +11,9 @@ public class GameplayManager : LevelManager
     }
 
     [SerializeField] private StorePanel storePanel;
+    [SerializeField] private Helmets helmets;
     private Shop currentShop;
+
 
     public override void StartScene()
     {
@@ -31,5 +33,6 @@ public class GameplayManager : LevelManager
     {
         currentShop.UpdateShopData(modifiedShopData);
         MouseController.Instance.ChangeState(MouseControllerState.Moving);
+        helmets.InitializeHelmets();
     }
 }

@@ -8,4 +8,5 @@ public enum InteractionType
 {
     None = 0,
     Shop,
+    HelmetEquip,
 }

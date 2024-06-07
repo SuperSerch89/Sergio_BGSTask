@@ -27,8 +27,18 @@ MonoBehaviour:
       m_Sprite: {fileID: -1903671925, guid: d51d8f2a0f48e5a489bb5af783b1044c, type: 3}
       m_FromMain: 0
       m_SpriteOverride: {fileID: -1903671925, guid: d51d8f2a0f48e5a489bb5af783b1044c, type: 3}
+    - m_Name: Pink
+      m_Hash: 206692072
+      m_Sprite: {fileID: -45486776, guid: d51d8f2a0f48e5a489bb5af783b1044c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -45486776, guid: d51d8f2a0f48e5a489bb5af783b1044c, type: 3}
+    - m_Name: Sky
+      m_Hash: 1047212559
+      m_Sprite: {fileID: -1628150442, guid: d51d8f2a0f48e5a489bb5af783b1044c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1628150442, guid: d51d8f2a0f48e5a489bb5af783b1044c, type: 3}
     m_FromMain: 0
-    m_EntryOverrideCount: 2
+    m_EntryOverrideCount: 4
   m_PrimaryLibraryGUID: 
-  m_ModificationHash: 638532841208359751
+  m_ModificationHash: 638533394172223818
   m_Version: 1

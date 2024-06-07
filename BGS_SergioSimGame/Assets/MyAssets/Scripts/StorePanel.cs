@@ -60,7 +60,7 @@ public class StorePanel : MonoBehaviour
 
     private void Awake()
     {
-        storePanel.SetActive(false);
+        //storePanel.SetActive(false);
     }
 
     /// <summary>
@@ -317,6 +317,8 @@ public enum StoreItems
     //***** Helmets
     HelmetDefault = 20,
     HelmetBlue,
+    HelmetPink,
+    HelmetSky,
     //***** Consumables
     Cheese = 50,
     //***** PureScrap
