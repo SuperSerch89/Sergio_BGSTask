@@ -21,6 +21,14 @@ public class Helmets : MonoBehaviour
 
     public void InitializeHelmets()
     {
+        foreach (Transform child in helmetPositions)
+        {
+            foreach (Transform child2 in child)
+            {
+                Destroy(child2.gameObject);
+            }
+        }
+
         int positionCount = 0;
         foreach(HelmetItem helmetItem in possibleHelmets)
         {
